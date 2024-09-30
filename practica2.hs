@@ -7,31 +7,33 @@ sumaLista [] = 0
 sumaLista (x:xs) = x + sumaLista xs
 
 agregaElemento :: [a] -> a -> Bool -> [a]
-agregaElemento lista elem True = elem : lista
-agregaElemento lista elem False = lista ++ [elem]
+agregaElemento [] elem condicion = [elem]
+agregaElemento lista elem condicion =
+    if condicion == True
+        then elem : lista
+        else lista ++ [elem]
 
 maximoLista :: (Num a, Ord a) => [a] -> a
+maximoLista [] = error "La lista no puede estar vacía"
 maximoLista [x] = x
-maximoLista (x:xs) = max x (maximoLista xs)
+maximoLista (x:xs) =
+    if x > maximoLista xs
+        then x
+        else maximoLista xs
 
 indice :: [a] -> Int -> a
-indice lista i =
-    if i > longitud lista - 1
-   then error "índice fuera de rango"
-   else indicevalido lista i
-    where
-        indicevalido (x:xs) 0 = x
-        indicevalido (x:xs) i = indicevalido xs (i - 1)
+indice (x:xs) 0 = x
+indice (x:xs) i =
+    if i > longitud (x:xs) - 1 || i <= 0
+        then error "índice fuera de rango"
+        else indice xs (i-1)
 
 divisores :: Int -> [Int]
 divisores n = [x | x <- [1..n], n `mod` x == 0]
 
 conjunto :: Eq a => [a] -> [a]
 conjunto [] = []
-conjunto (x:xs) = if x `elem` xs
-   then conjunto xs
-   else x : conjunto xs
-
+conjunto (x:xs) = x : conjunto [y | y <- xs, y /= x]
 
 numerosPares :: [Int] -> [Int]
 numerosPares [] = []
