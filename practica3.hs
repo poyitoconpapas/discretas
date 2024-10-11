@@ -13,27 +13,26 @@ estaContenido (Node x rest) elem
     | x == elem = True
     | otherwise = estaContenido rest elem
 
---3. Convertir una lista de haskell a nuestra nueva estructura ded lista
+--3. Convertir una lista de haskell a nuestra nueva estructura de lista
 convertirAEstructura :: [a] -> List a
 convertirAEstructura [] = Void
 convertirAEstructura (x:xs) = Node x (convertirAEstructura xs)
 
---4. Convertir nuestra nueva estructura en una lista ya definida en haskell
+--4. Convertir nuestra estructura en una lista ya definida en haskell
 convertirALista :: List a -> [a]
 convertirALista Void = []
 convertirALista (Node x rest) = x : convertirALista rest
 
---5. Convertir en un conjunto nuestra nueva estructura de lista
+--5. Convertir en un conjunto nuestra estructura de lista
 conjunto :: Eq a => List a -> List a
-conjunto lista = convertirAEstructura (conjuntoLista (convertirALista lista))
-
-conjuntoLista :: Eq a => [a] -> [a]
-conjuntoLista [] = []
-conjuntoLista (x:xs) = x : conjuntoLista [y | y <- xs, y /= x]
+conjunto Void = Void
+conjunto (Node x rest)
+    | (estaContenido (rest) x) = conjunto rest
+    | otherwise = Node x (conjunto rest)
 
 --6. Eliminar un elemento en un índice específico
 eliminarIndice :: List a -> Int -> List a
-eliminarIndice Void _ = Void
+eliminarIndice Void n = error "No se puede eliminar de una lista vacía"
 eliminarIndice (Node x rest) 0 = rest
 eliminarIndice (Node x rest) n
     | (n < 0) || (n >= longitud (Node x rest)) = error "Indice fuera del rango permitido."
@@ -41,17 +40,15 @@ eliminarIndice (Node x rest) n
 
 --7. Agregar un elemento en un índice especifico
 insertarIndice :: List a -> Int -> a -> List a
-insertarIndice Void _ _ = Void
+insertarIndice Void n elem
+    | (n > 0) = error "Indice fuera del rango permitido."
+    | otherwise = Node elem Void
 insertarIndice (Node x rest) 0 elem = Node elem (Node x rest)
 insertarIndice (Node x rest) n elem
-    | (n < 0) || (n > longitud (Node x rest)-1) = error "Indice fuera del rango permitido."
-    | otherwise = Node x (insertarIndice rest (n - 1) elem)
+    | (n < 0) || (n > longitud (Node x rest)) = error "Indice fuera del rango permitido."
+    | otherwise = Node x (insertarIndice rest(n - 1) elem)
 
---8. Recorrer n veces a la izquierda los elementos de nuestra nueva estructura de lista
+--8. Recorrer n veces a la izquierda los elementos de nuestra estructura de lista
 recorrerLista :: List a -> Int -> List a
 recorrerLista lista 0 = lista
-recorrerLista (Node x xs) n = recorrerLista (concatenar xs (Node x Void)) (n - 1)
-
-concatenar :: List a -> List a -> List a
-concatenar Void ys = ys
-concatenar (Node x xs) ys = Node x (concatenar xs ys)
+recorrerLista (Node x xs) n = recorrerLista (insertarIndice (xs) ( (longitud (xs)) ) x) (n-1)
