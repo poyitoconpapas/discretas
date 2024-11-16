@@ -8,15 +8,13 @@ longitud (Raiz _ y z) = 1 + longitud (y) + longitud (z)
 
 --Ejercicio 2
 profundidad :: Arbol a -> Int
-profundidad ArbolVacio = error "El árbol está vacío"
+profundidad ArbolVacio = 0
 profundidad (Raiz _ y z) = max (profundidad (y)) (profundidad (z)) + 1
 
 --Ejercicio 3
 ancho :: Arbol a -> Int
 ancho ArbolVacio = 0
 ancho (Raiz _ ArbolVacio ArbolVacio) = 1
-ancho (Raiz _ y ArbolVacio) = 1
-ancho (Raiz _ ArbolVacio z) = 1
 ancho (Raiz _ y z) = ancho (y) + ancho (z)
 
 --Ejercicio 4
@@ -39,38 +37,42 @@ niveles (Raiz x y z) = [x] : combinar (niveles y) (niveles z)
 
 --Ejercicio 6
 minimo :: Ord a => Arbol a -> a
-minimo (Raiz a ArbolVacio ArbolVacio) = a
-minimo (Raiz a izq der)
-    | a <= minimo(izq) && a <= minimo(der) = a
-    | minimo(izq) <= a && minimo(izq) <= minimo(der) = minimo(izq)
-    | otherwise = minimo(der)
+minimo (ArbolVacio) = error "Un árbol vacío no tiene minimo"
+minimo (Raiz x ArbolVacio ArbolVacio) = x
+minimo (Raiz x y ArbolVacio)
+    | x <= minimo y = x
+    | otherwise = minimo y
+minimo (Raiz x ArbolVacio z)
+    | x <= minimo z = x
+    | otherwise = minimo z
+minimo (Raiz x y z)
+    | x <= minimo(y) && x < minimo(z) = x
+    | minimo(y) <= x && minimo(y) <= minimo(z) = minimo(y)
+    | otherwise = minimo(z)
 
 --Ejercicio 7
 maximo :: Ord a => Arbol a -> a
+maximo (ArbolVacio) = error "Un árbol vacío no tiene máximo"
 maximo (Raiz x ArbolVacio ArbolVacio) = x
+maximo (Raiz x y ArbolVacio)
+    | x >= maximo y = x
+    | otherwise = maximo y
+maximo (Raiz x ArbolVacio z)
+    | x >= maximo z = x
+    | otherwise = maximo z
 maximo (Raiz x y z)
     | x >= maximo(y) && x >= maximo(z) = x
     | maximo(y) >= x && maximo(y) >= maximo(z) = maximo(y)
-    | otherwise = maximo(z)
+    | otherwise = maximo (z)
 
 --Ejercicio 8
 eliminar :: Ord a => Arbol a -> a -> Arbol a
-eliminar ArbolVacio elemento = error "No puedes eliminar algo de un árbol vacío"
-eliminar (Raiz x ArbolVacio ArbolVacio) elemento
-    | x == elemento = ArbolVacio
-    | otherwise = error "El elemento a eliminar no se encuentra dentro del árbol"
-
-eliminar (Raiz x y ArbolVacio) elemento
-    | elemento == x = y
-    | elemento /= x = Raiz x (eliminar y elemento) ArbolVacio
-    |otherwise = error "El elemento a eliminar no se encuentra dentro del árbol"
-
+eliminar ArbolVacio _ = error "No existe el elemento en el árbol"
 eliminar (Raiz x ArbolVacio z) elemento
-    | elemento == x = z
-    | elemento /= x = Raiz x ArbolVacio (eliminar z elemento)
-    | otherwise = error "El elemento a eliminar no se encuentra dentro del árbol"
-
+    | x == elemento = z  -- Devuelve el subárbol derecho
+eliminar (Raiz x y ArbolVacio) elemento
+    | x == elemento = y  -- Devuelve el subárbol izquierdo
 eliminar (Raiz x y z) elemento
-    | elemento == x = Raiz (minimo z) y (eliminar z (minimo z))
-    | elemento /= x = Raiz x y (eliminar z elemento)
-    | otherwise = Raiz x (eliminar y elemento) z
+    | elemento < x = Raiz x (eliminar y elemento) z  -- Busca en el subárbol izquierdo
+    | elemento > x = Raiz x y (eliminar z elemento)  -- Busca en el subárbol derecho
+    | otherwise = Raiz (minimo z) y (eliminar z (minimo z))
